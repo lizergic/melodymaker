@@ -1,0 +1,11 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "melodymaker",
+  "compatibility_date": "2026-06-22",
+  // Static-assets-only deploy: no Worker script (no "main"), just serve dist/.
+  // _headers (CSP) and _redirects in dist/ are honored by Workers assets.
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application"
+  }
+}
