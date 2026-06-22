@@ -38,7 +38,10 @@ export function toMidi(melody: Melody, withChords = true): Midi {
 }
 
 export function toMidiBlob(melody: Melody, withChords = true): Blob {
-  return new Blob([toMidi(melody, withChords).toArray()], { type: "audio/midi" });
+  // toArray() returns a freshly-allocated Uint8Array spanning its whole buffer.
+  // .buffer cast sidesteps TS's SharedArrayBuffer-vs-ArrayBuffer narrowing; no copy.
+  const bytes = toMidi(melody, withChords).toArray();
+  return new Blob([bytes.buffer as ArrayBuffer], { type: "audio/midi" });
 }
 
 export function midiFilename(input: Melody["input"]): string {
