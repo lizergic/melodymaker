@@ -3,6 +3,7 @@ import type { Melody } from "./engine";
 import { chordPitchClasses } from "./theory";
 
 let synth: Tone.PolySynth | null = null;
+let active = false; // synchronous play-guard; survives the `await Tone.start()` race
 
 function getSynth(): Tone.PolySynth {
   if (!synth) synth = new Tone.PolySynth(Tone.Synth).toDestination();
@@ -11,11 +12,22 @@ function getSynth(): Tone.PolySynth {
 
 const toNote = (midi: number) => Tone.Frequency(midi, "midi").toNote();
 
+export function isPlaying(): boolean {
+  return active;
+}
+
 export async function play(melody: Melody, withChords = true): Promise<void> {
+  // Idempotent: a click while already playing is a no-op, not a second layer.
+  // The guard is set synchronously, BEFORE the await, so rapid double-clicks on
+  // the very first play (transport not started yet) can't both slip through.
+  if (active) return;
+  active = true;
+
   await Tone.start();
-  stop();
+  Tone.Transport.cancel(0);
   const s = getSynth();
   const secPerBeat = 60 / melody.input.tempo;
+  const totalBeats = melody.input.bars * melody.input.beatsPerBar;
   Tone.Transport.bpm.value = melody.input.tempo;
 
   for (const n of melody.notes) {
@@ -25,7 +37,6 @@ export async function play(melody: Melody, withChords = true): Promise<void> {
   }
 
   if (withChords) {
-    const totalBeats = melody.input.bars * melody.input.beatsPerBar;
     const beatsPerChord = totalBeats / melody.input.chords.length;
     melody.input.chords.forEach((sym, i) => {
       const names = chordPitchClasses(sym).map((pc) => toNote(48 + pc));
@@ -35,6 +46,9 @@ export async function play(melody: Melody, withChords = true): Promise<void> {
     });
   }
 
+  // Auto-stop once the last note has rung out, so the guard resets and Play re-arms.
+  Tone.Transport.scheduleOnce(() => stop(), totalBeats * secPerBeat + 0.5);
+
   Tone.Transport.position = 0;
   Tone.Transport.start();
 }
@@ -42,4 +56,6 @@ export async function play(melody: Melody, withChords = true): Promise<void> {
 export function stop(): void {
   Tone.Transport.stop();
   Tone.Transport.cancel(0);
+  synth?.releaseAll(); // kill any voices still ringing so nothing bleeds into a restart
+  active = false;
 }

@@ -123,6 +123,7 @@ function renderHistory() {
 
 genBtn.addEventListener("click", () => {
   if (!validate()) return;
+  stop(); // a fresh melody clears any in-progress playback so Play re-arms cleanly
   const seed = Math.floor(Math.random() * 2 ** 31);
   const melody = generate(readInput(seed));
   setCurrent(melody);
