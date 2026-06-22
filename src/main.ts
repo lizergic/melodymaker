@@ -1,7 +1,7 @@
 import { generate, REGISTER, type GenInput, type Melody } from "./engine";
 import { SCALES, isValidChord } from "./theory";
 import { play, stop } from "./audio";
-import { toMidiBlob, midiFilename } from "./midi";
+import { toMidiBlob, midiFilename, toChordsMidiBlob, chordsMidiFilename } from "./midi";
 import { loadHistory, pushHistory } from "./history";
 
 const KEYS = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
@@ -25,6 +25,7 @@ const genBtn = $<HTMLButtonElement>("generate");
 const playBtn = $<HTMLButtonElement>("play");
 const stopBtn = $<HTMLButtonElement>("stop");
 const dlBtn = $<HTMLButtonElement>("download");
+const dlChordsBtn = $<HTMLButtonElement>("download-chords");
 const canvas = $<HTMLCanvasElement>("roll");
 const historyEl = $<HTMLOListElement>("history");
 
@@ -105,6 +106,7 @@ function setCurrent(melody: Melody) {
   playBtn.disabled = false;
   stopBtn.disabled = false;
   dlBtn.disabled = false;
+  dlChordsBtn.disabled = false;
 }
 
 function renderHistory() {
@@ -133,15 +135,22 @@ playBtn.addEventListener("click", () => {
 });
 stopBtn.addEventListener("click", () => stop());
 
-dlBtn.addEventListener("click", () => {
-  if (!current) return;
-  const url = URL.createObjectURL(toMidiBlob(current));
+function download(blob: Blob, name: string) {
+  const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = midiFilename(current.input);
+  a.download = name;
   a.click();
   // Defer revoke: some browsers cancel the download if the URL dies too soon.
   setTimeout(() => URL.revokeObjectURL(url), 0);
+}
+
+dlBtn.addEventListener("click", () => {
+  if (current) download(toMidiBlob(current), midiFilename(current.input));
+});
+
+dlChordsBtn.addEventListener("click", () => {
+  if (current) download(toChordsMidiBlob(current), chordsMidiFilename(current.input));
 });
 
 presetsEl.addEventListener("change", () => {
