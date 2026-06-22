@@ -69,9 +69,9 @@ function readInput(seed: number): GenInput {
     key: keyEl.value,
     scale: scaleEl.value,
     chords: parseChords(),
-    bars: Math.max(1, Number(barsEl.value)),
+    bars: Math.min(16, Math.max(1, Number(barsEl.value) || 1)),
     beatsPerBar: 4,
-    tempo: Math.max(40, Number(tempoEl.value)),
+    tempo: Math.min(240, Math.max(40, Number(tempoEl.value) || 100)),
     seed,
   };
 }
@@ -140,7 +140,8 @@ dlBtn.addEventListener("click", () => {
   a.href = url;
   a.download = midiFilename(current.input);
   a.click();
-  URL.revokeObjectURL(url);
+  // Defer revoke: some browsers cancel the download if the URL dies too soon.
+  setTimeout(() => URL.revokeObjectURL(url), 0);
 });
 
 presetsEl.addEventListener("change", () => {
