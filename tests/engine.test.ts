@@ -45,16 +45,19 @@ describe("engine.generate", () => {
     }
   });
 
-  it("keeps every note diatonic to the key/scale or a tone of its chord", () => {
+  // Strong onsets are chord tones (tested above); every OTHER note must be a
+  // scale tone. Asserting scale-membership specifically (not "scale OR chord")
+  // catches a regression where weak beats wrongly emit off-scale chord tones.
+  it("uses scale tones for every weak/passing note", () => {
     const { notes } = generate(INPUT);
     const scalePcs = scalePitchClasses(INPUT.key, INPUT.scale);
-    const totalBeats = INPUT.bars * INPUT.beatsPerBar;
-    const beatsPerChord = totalBeats / INPUT.chords.length;
+    const half = Math.floor(INPUT.beatsPerBar / 2);
     for (const n of notes) {
-      const chord =
-        INPUT.chords[Math.min(INPUT.chords.length - 1, Math.floor(n.startBeat / beatsPerChord))];
-      const allowed = new Set([...scalePcs, ...chordPitchClasses(chord)]);
-      expect(allowed.has(((n.midi % 12) + 12) % 12)).toBe(true);
+      const beatInBar = n.startBeat % INPUT.beatsPerBar;
+      const isStrongOnset =
+        Number.isInteger(n.startBeat) && (beatInBar === 0 || beatInBar === half);
+      if (isStrongOnset) continue;
+      expect(scalePcs).toContain(((n.midi % 12) + 12) % 12);
     }
   });
 });

@@ -43,6 +43,8 @@ export function generate(input: GenInput): Melody {
   const scalePcs = scalePitchClasses(input.key, input.scale);
   const { lo, hi } = REGISTER;
   const totalBeats = input.bars * input.beatsPerBar;
+  // ponytail: even split; if chords don't divide totalBeats evenly the last
+  // chord just runs longer. Fine for v1 — add per-chord bar counts if it matters.
   const beatsPerChord = totalBeats / input.chords.length;
   const half = Math.floor(input.beatsPerBar / 2);
 
