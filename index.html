@@ -4,9 +4,33 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>MelodyMaker</title>
+    <link rel="stylesheet" href="/src/styles.css" />
   </head>
   <body>
-    <div id="app">MelodyMaker</div>
+    <main id="app">
+      <h1>MelodyMaker</h1>
+      <div class="controls">
+        <label>Key <select id="key"></select></label>
+        <label>Scale <select id="scale"></select></label>
+        <label>Bars <input id="bars" type="number" min="1" max="16" value="4" /></label>
+        <label>Tempo <input id="tempo" type="number" min="40" max="240" value="100" /></label>
+        <label class="wide">
+          Chords
+          <input id="chords" type="text" value="Cmaj7 Am7 Dm7 G7" />
+        </label>
+        <label>Presets <select id="presets"></select></label>
+        <span id="chord-error" class="error"></span>
+      </div>
+      <div class="buttons">
+        <button id="generate">Generate</button>
+        <button id="play" disabled>Play</button>
+        <button id="stop" disabled>Stop</button>
+        <button id="download" disabled>Download MIDI</button>
+      </div>
+      <canvas id="roll" width="900" height="240"></canvas>
+      <h2>History</h2>
+      <ol id="history"></ol>
+    </main>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

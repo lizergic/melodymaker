@@ -1,0 +1,16 @@
+:root { color-scheme: dark; font-family: system-ui, sans-serif; }
+body { margin: 0; background: #14161c; color: #e6e6e6; }
+#app { max-width: 960px; margin: 0 auto; padding: 24px; }
+h1 { margin: 0 0 16px; }
+.controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; }
+.controls label { display: flex; flex-direction: column; font-size: 12px; gap: 4px; }
+.controls .wide { flex: 1 1 260px; }
+select, input, button { font: inherit; padding: 6px 8px; border-radius: 6px; border: 1px solid #333; background: #1d2029; color: #e6e6e6; }
+.buttons { display: flex; gap: 8px; margin: 16px 0; }
+button { cursor: pointer; }
+button:disabled { opacity: 0.4; cursor: default; }
+.error { color: #ff7a7a; font-size: 12px; align-self: center; }
+canvas { width: 100%; background: #0f1116; border-radius: 8px; display: block; }
+#history { padding-left: 20px; }
+#history li { cursor: pointer; padding: 4px 0; }
+#history li:hover { color: #9ad; }
