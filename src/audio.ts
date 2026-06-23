@@ -16,6 +16,11 @@ export function isPlaying(): boolean {
   return active;
 }
 
+// Current transport time in seconds — for the UI playhead. 0 when stopped.
+export function position(): number {
+  return Tone.Transport.seconds;
+}
+
 export async function play(melody: Melody, withChords = true): Promise<void> {
   // Idempotent: a click while already playing is a no-op, not a second layer.
   // The guard is set synchronously, BEFORE the await, so rapid double-clicks on

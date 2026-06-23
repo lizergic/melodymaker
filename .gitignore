@@ -5,3 +5,6 @@ dist/
 
 # build-process scratch (SDD ledger/reports)
 .superpowers/
+
+# design source export (kept locally, not in repo)
+Open Design/

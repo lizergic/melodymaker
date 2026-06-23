@@ -3,35 +3,112 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>MelodyMaker</title>
+    <meta name="theme-color" content="#08060e" />
+    <title>melodymaker — lizergic</title>
     <link rel="stylesheet" href="/src/styles.css" />
   </head>
   <body>
-    <main id="app">
-      <h1>MelodyMaker</h1>
-      <div class="controls">
-        <label>Key <select id="key"></select></label>
-        <label>Scale <select id="scale"></select></label>
-        <label>Bars <input id="bars" type="number" min="1" max="16" value="4" /></label>
-        <label>Tempo <input id="tempo" type="number" min="40" max="240" value="100" /></label>
-        <label class="wide">
-          Chords
-          <input id="chords" type="text" value="Cmaj7 Am7 Dm7 G7" />
-        </label>
-        <label>Presets <select id="presets"></select></label>
-        <span id="chord-error" class="error"></span>
+    <div class="wrap">
+      <header>
+        <div class="wordmark" aria-label="lizergic melodymaker">
+          <span class="lz">lizergic</span><span class="sep">/</span><span class="mm">melodymaker</span>
+        </div>
+        <p class="tagline">
+          harmonically-aware melodies from a <b>key</b>, <b>scale</b> &amp;
+          <b>progression</b>. play in-browser · export midi.
+        </p>
+      </header>
+
+      <!-- ============ control console ============ -->
+      <section class="console" aria-label="melody inputs">
+        <div class="console-head"><span class="dot"></span><h2>console</h2></div>
+        <div class="fields">
+          <div class="field k-key">
+            <label for="key">key <span class="req">*</span></label>
+            <select id="key" class="control"></select>
+          </div>
+          <div class="field k-scale">
+            <label for="scale">scale</label>
+            <select id="scale" class="control"></select>
+          </div>
+          <div class="field k-chords">
+            <label for="chords">chords</label>
+            <input id="chords" class="control" type="text" spellcheck="false" autocomplete="off"
+              placeholder="Cmaj7 Am7 Dm7 G7" value="Cmaj7 Am7 Dm7 G7" />
+          </div>
+
+          <div class="field k-preset">
+            <label for="preset">presets</label>
+            <select id="preset" class="control"></select>
+          </div>
+          <div class="field k-bars">
+            <label for="bars">bars</label>
+            <input id="bars" class="control" type="number" min="1" max="16" step="1" value="4" />
+          </div>
+          <div class="field k-tempo">
+            <label for="tempo">tempo</label>
+            <input id="tempo" class="control" type="number" min="40" max="240" step="1" value="100" />
+          </div>
+          <div class="field k-pad" aria-hidden="true"></div>
+        </div>
+        <div id="errslot" class="errslot" data-state="ok" role="status" aria-live="polite">
+          <span class="ico"></span><span id="errtext">ready — set inputs and hit generate</span>
+        </div>
+      </section>
+
+      <!-- ============ actions ============ -->
+      <div class="actions">
+        <button id="gen" class="btn btn-primary" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3v4M3 5h4M6 17v4M4 19h4"/><path d="M13 4l2.5 6.5L22 13l-6.5 2.5L13 22l-2.5-6.5L4 13l6.5-2.5z"/></svg>
+          generate
+        </button>
+        <button id="play" class="btn" type="button" disabled>
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 5v14l12-7z"/></svg>
+          play
+        </button>
+        <button id="stop" class="btn" type="button" disabled>
+          <svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="1.5"/></svg>
+          stop
+        </button>
+        <button id="dlmidi" class="btn" type="button" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg>
+          download midi
+        </button>
+        <button id="dlchords" class="btn" type="button" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l9-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+          download chords
+        </button>
+        <span class="spacer"></span>
+        <span class="seedtag" id="seedtag">seed <b>—</b></span>
       </div>
-      <div class="buttons">
-        <button id="generate">Generate</button>
-        <button id="play" disabled>Play</button>
-        <button id="stop" disabled>Stop</button>
-        <button id="download" disabled>Download MIDI</button>
-        <button id="download-chords" disabled>Download Chords</button>
-      </div>
-      <canvas id="roll" width="900" height="240"></canvas>
-      <h2>History</h2>
-      <ol id="history"></ol>
-    </main>
+
+      <!-- ============ piano-roll hero ============ -->
+      <section class="roll-card" aria-label="piano roll">
+        <div class="roll-top">
+          <div class="meta" id="rollmeta"><span>—</span></div>
+          <div class="status" id="rollstatus"><span class="led"></span><span class="txt">idle</span></div>
+        </div>
+        <div class="roll" id="roll">
+          <div class="roll-empty" id="rollempty">
+            <span>the sequencer is dark. hit <b class="hl">generate</b> to fill the grid.</span>
+          </div>
+          <div class="roll-grid" id="rollgrid"></div>
+          <div class="roll-bars" id="rollbars"></div>
+          <div class="playhead" id="playhead"></div>
+        </div>
+      </section>
+
+      <!-- ============ history ============ -->
+      <section class="history" aria-label="generation history">
+        <h3>history <span class="count" id="histcount">/ last 10</span></h3>
+        <div id="histwrap"></div>
+      </section>
+
+      <footer>
+        <span>melodymaker · web audio + midi · dark only</span>
+        <span>kbd: <kbd>g</kbd> generate · <kbd>space</kbd> play/stop</span>
+      </footer>
+    </div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
