@@ -330,5 +330,14 @@ window.addEventListener("keydown", (e) => {
   }
 });
 
+// header: graceful GitHub star count (button still works as a plain repo link if this fails)
+fetch("https://api.github.com/repos/lizergic/melodymaker")
+  .then((r) => (r.ok ? r.json() : null))
+  .then((d) => {
+    const el = document.getElementById("repoStars");
+    if (el && d && typeof d.stargazers_count === "number") el.textContent = "★ " + d.stargazers_count.toLocaleString();
+  })
+  .catch(() => {});
+
 validate();
 renderHistory();
