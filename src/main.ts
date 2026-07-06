@@ -1,10 +1,11 @@
 import "@fontsource-variable/space-grotesk/index.css";
 import "@fontsource-variable/jetbrains-mono/index.css";
 import { generate, REGISTER, type GenInput, type Melody } from "./engine";
-import { SCALES, scalePitchClasses, isValidChord } from "./theory";
+import { SCALES, scalePitchClasses, chordPitchClasses, isValidChord, CHORD_BASE } from "./theory";
 import { play, stop, isPlaying, position } from "./audio";
 import { toMidiBlob, midiFilename, toChordsMidiBlob, chordsMidiFilename } from "./midi";
 import { loadHistory, pushHistory, HISTORY_MAX } from "./history";
+import { generateChords } from "./progressions";
 
 const KEYS = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 const PRESETS: Record<string, string> = {
@@ -21,6 +22,7 @@ const keyEl = $<HTMLSelectElement>("key");
 const scaleEl = $<HTMLSelectElement>("scale");
 const chordsEl = $<HTMLInputElement>("chords");
 const presetEl = $<HTMLSelectElement>("preset");
+const autoEl = $<HTMLInputElement>("autochords");
 const barsEl = $<HTMLInputElement>("bars");
 const tempoEl = $<HTMLInputElement>("tempo");
 const errslot = $<HTMLDivElement>("errslot");
@@ -73,6 +75,12 @@ function setStatus(live: boolean, text: string) {
 }
 
 function validate(): boolean {
+  if (autoEl.checked) {
+    errslot.dataset.state = "ok";
+    errtext.textContent = "chords auto-generated from key + scale";
+    genBtn.disabled = false;
+    return true;
+  }
   const chords = parseChords();
   const bad = chords.filter((c) => !isValidChord(c));
   let ok = false;
@@ -95,7 +103,7 @@ function readInput(seed: number): GenInput {
   return {
     key: keyEl.value,
     scale: scaleEl.value,
-    chords: parseChords(),
+    chords: autoEl.checked ? generateChords(keyEl.value, scaleEl.value, seed) : parseChords(),
     bars: Math.min(16, Math.max(1, Number(barsEl.value) || 1)),
     beatsPerBar: BEATS_PER_BAR,
     tempo: Math.min(240, Math.max(40, Number(tempoEl.value) || 100)),
@@ -121,7 +129,8 @@ function span(cls: string, text: string): HTMLSpanElement {
 }
 
 function renderRoll(melody: Melody) {
-  const { lo, hi } = REGISTER;
+  const hi = REGISTER.hi;
+  const lo = CHORD_BASE; // roll spans chord octave (48+) up through the melody register
   const lanes = hi - lo + 1;
   const totalBeats = melody.input.bars * melody.input.beatsPerBar;
   const scalePcs = scalePitchClasses(melody.input.key, melody.input.scale);
@@ -151,7 +160,22 @@ function renderRoll(melody: Melody) {
   rollbars.replaceChildren(...lines);
 
   // notes (glowing bars), inserted before the playhead so it stays on top
-  roll.querySelectorAll(".note").forEach((n) => n.remove());
+  roll.querySelectorAll(".note, .chordbar").forEach((n) => n.remove());
+
+  // chord tones as translucent bars at their played pitches
+  const beatsPerChord = totalBeats / melody.input.chords.length;
+  melody.input.chords.forEach((sym, i) => {
+    for (const pc of chordPitchClasses(sym)) {
+      const el = document.createElement("div");
+      el.className = "chordbar";
+      el.style.left = `${((i * beatsPerChord) / totalBeats) * 100}%`;
+      el.style.width = `calc(${(beatsPerChord / totalBeats) * 100}% - 1px)`;
+      el.style.top = `calc(${((hi - (lo + pc)) / lanes) * 100}% + 1px)`;
+      el.style.height = `calc(${(1 / lanes) * 100}% - 2px)`;
+      roll.insertBefore(el, playhead);
+    }
+  });
+
   noteEls = [];
   for (const n of melody.notes) {
     const el = document.createElement("div");
@@ -279,6 +303,7 @@ genBtn.addEventListener("click", () => {
   stopPlayback(); // a fresh melody clears any in-progress playback
   const seed = Math.floor(Math.random() * 2 ** 31);
   const melody = generate(readInput(seed));
+  if (autoEl.checked) chordsEl.value = melody.input.chords.join(" ");
   setCurrent(melody);
   pushHistory(melody.input);
   renderHistory();
@@ -303,6 +328,13 @@ presetEl.addEventListener("change", () => {
   presetEl.value = "—";
 });
 chordsEl.addEventListener("input", validate);
+
+function syncAutoUI() {
+  chordsEl.disabled = autoEl.checked;
+  presetEl.disabled = autoEl.checked;
+  validate();
+}
+autoEl.addEventListener("change", syncAutoUI);
 
 histwrap.addEventListener("click", (e) => {
   const row = (e.target as HTMLElement).closest(".hrow") as HTMLElement | null;
@@ -339,5 +371,5 @@ fetch("https://api.github.com/repos/lizergic/melodymaker")
   })
   .catch(() => {});
 
-validate();
+syncAutoUI();
 renderHistory();

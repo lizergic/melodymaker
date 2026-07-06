@@ -96,6 +96,11 @@ header { display: flex; align-items: flex-end; justify-content: space-between; g
 label { font-family: var(--fmono); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted-2); }
 label .req { color: var(--accent); }
 
+.labelrow { display: flex; align-items: center; justify-content: space-between; }
+.autotoggle { display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--accent); }
+.autotoggle input { accent-color: var(--accent); margin: 0; cursor: pointer; }
+.control:disabled { opacity: 0.45; cursor: not-allowed; }
+
 .control {
   font-family: var(--fmono); font-size: 14px; font-weight: 500; color: var(--white);
   background: #0a0714;
@@ -200,6 +205,11 @@ input[type="number"].control::-webkit-inner-spin-button { -webkit-appearance: no
   background: linear-gradient(115deg, #9bffd0, #4ade80 55%, #b06bff);
   box-shadow: 0 0 16px 1px rgba(74, 222, 128, 0.8), 0 0 4px rgba(255, 255, 255, 0.9);
   filter: brightness(1.15);
+}
+.chordbar {
+  position: absolute; border-radius: 2px; pointer-events: none;
+  background: rgba(74, 222, 128, 0.12);
+  border: 1px solid rgba(74, 222, 128, 0.26);
 }
 .playhead {
   position: absolute; top: 0; bottom: 0; width: 2px; left: 0;
