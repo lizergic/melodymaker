@@ -7,7 +7,7 @@ import { isValidChord } from "./theory";
 const POOL: number[][] = [
   [0, 4, 5, 3], // I–V–vi–IV (pop)
   [0, 5, 3, 4], // I–vi–IV–V (50s)
-  [1, 4, 0, 0], // ii–V–I
+  [1, 4, 0, 0], // ii–V–I–I (repeated tonic pads it to 4 chords for even bar splits)
   [0, 5, 1, 4], // I–vi–ii–V
   [0, 3, 4, 3], // I–IV–V–IV
   [5, 3, 0, 4], // vi–IV–I–V
@@ -21,7 +21,8 @@ const PARENT: Record<string, string> = {
 };
 
 // First detected symbol that round-trips through Chord.get; slash chords excluded
-// because downstream only reads pitch classes and slash basses confuse Chord.get.
+// because downstream only reads pitch classes — inversions add nothing there — and
+// the plainer root-position symbol displays better in the UI.
 function nameChord(notes: string[]): string | null {
   return Chord.detect(notes).find((s) => !s.includes("/") && isValidChord(s)) ?? null;
 }

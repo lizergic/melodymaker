@@ -170,7 +170,7 @@ function renderRoll(melody: Melody) {
       el.className = "chordbar";
       el.style.left = `${((i * beatsPerChord) / totalBeats) * 100}%`;
       el.style.width = `calc(${(beatsPerChord / totalBeats) * 100}% - 1px)`;
-      el.style.top = `calc(${((hi - (CHORD_BASE + pc)) / lanes) * 100}% + 1px)`;
+      el.style.top = `calc(${((hi - (lo + pc)) / lanes) * 100}% + 1px)`;
       el.style.height = `calc(${(1 / lanes) * 100}% - 2px)`;
       roll.insertBefore(el, playhead);
     }
