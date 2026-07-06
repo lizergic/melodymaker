@@ -96,6 +96,11 @@ header { display: flex; align-items: flex-end; justify-content: space-between; g
 label { font-family: var(--fmono); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted-2); }
 label .req { color: var(--accent); }
 
+.labelrow { display: flex; align-items: center; justify-content: space-between; }
+.autotoggle { display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--accent); }
+.autotoggle input { accent-color: var(--accent); margin: 0; cursor: pointer; }
+.control:disabled { opacity: 0.45; cursor: not-allowed; }
+
 .control {
   font-family: var(--fmono); font-size: 14px; font-weight: 500; color: var(--white);
   background: #0a0714;
