@@ -1,6 +1,6 @@
 # MelodyMaker
 
-Generate harmonically-aware melodies from a key + scale and a chord progression.
+Generate harmonically-aware melodies — and the chord progression under them — from a key + scale.
 Audition in-browser, re-roll, and export MIDI. Fully client-side; no backend.
 
 **Live:** https://melodymaker.lizergic.dev
