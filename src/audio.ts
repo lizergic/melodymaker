@@ -1,6 +1,6 @@
 import * as Tone from "tone";
 import type { Melody } from "./engine";
-import { chordPitchClasses } from "./theory";
+import { chordPitchClasses, CHORD_BASE } from "./theory";
 
 let synth: Tone.PolySynth | null = null;
 let active = false; // synchronous play-guard; survives the `await Tone.start()` race
@@ -44,7 +44,7 @@ export async function play(melody: Melody, withChords = true): Promise<void> {
   if (withChords) {
     const beatsPerChord = totalBeats / melody.input.chords.length;
     melody.input.chords.forEach((sym, i) => {
-      const names = chordPitchClasses(sym).map((pc) => toNote(48 + pc));
+      const names = chordPitchClasses(sym).map((pc) => toNote(CHORD_BASE + pc));
       Tone.Transport.schedule((t) => {
         s.triggerAttackRelease(names, beatsPerChord * secPerBeat, t, 0.45);
       }, i * beatsPerChord * secPerBeat);

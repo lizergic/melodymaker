@@ -1,8 +1,6 @@
 import { Midi } from "@tonejs/midi";
 import type { Melody } from "./engine";
-import { chordPitchClasses } from "./theory";
-
-const CHORD_BASE = 48; // C3-ish root area for the backing track
+import { chordPitchClasses, CHORD_BASE } from "./theory";
 
 function newMidi(melody: Melody): Midi {
   const midi = new Midi();

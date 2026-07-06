@@ -52,3 +52,6 @@ export function nearestMidi(
   }
   return best === -1 ? refMidi : best;
 }
+
+// C3-ish root area for the backing chords — shared by audio, MIDI export, and the roll.
+export const CHORD_BASE = 48;

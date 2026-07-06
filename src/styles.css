@@ -206,6 +206,11 @@ input[type="number"].control::-webkit-inner-spin-button { -webkit-appearance: no
   box-shadow: 0 0 16px 1px rgba(74, 222, 128, 0.8), 0 0 4px rgba(255, 255, 255, 0.9);
   filter: brightness(1.15);
 }
+.chordbar {
+  position: absolute; border-radius: 2px; pointer-events: none;
+  background: rgba(74, 222, 128, 0.12);
+  border: 1px solid rgba(74, 222, 128, 0.26);
+}
 .playhead {
   position: absolute; top: 0; bottom: 0; width: 2px; left: 0;
   background: linear-gradient(to bottom, transparent, var(--mint), transparent);

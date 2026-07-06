@@ -1,7 +1,7 @@
 import "@fontsource-variable/space-grotesk/index.css";
 import "@fontsource-variable/jetbrains-mono/index.css";
 import { generate, REGISTER, type GenInput, type Melody } from "./engine";
-import { SCALES, scalePitchClasses, isValidChord } from "./theory";
+import { SCALES, scalePitchClasses, chordPitchClasses, isValidChord, CHORD_BASE } from "./theory";
 import { play, stop, isPlaying, position } from "./audio";
 import { toMidiBlob, midiFilename, toChordsMidiBlob, chordsMidiFilename } from "./midi";
 import { loadHistory, pushHistory, HISTORY_MAX } from "./history";
@@ -129,7 +129,8 @@ function span(cls: string, text: string): HTMLSpanElement {
 }
 
 function renderRoll(melody: Melody) {
-  const { lo, hi } = REGISTER;
+  const hi = REGISTER.hi;
+  const lo = CHORD_BASE; // roll spans chord octave (48+) up through the melody register
   const lanes = hi - lo + 1;
   const totalBeats = melody.input.bars * melody.input.beatsPerBar;
   const scalePcs = scalePitchClasses(melody.input.key, melody.input.scale);
@@ -159,7 +160,22 @@ function renderRoll(melody: Melody) {
   rollbars.replaceChildren(...lines);
 
   // notes (glowing bars), inserted before the playhead so it stays on top
-  roll.querySelectorAll(".note").forEach((n) => n.remove());
+  roll.querySelectorAll(".note, .chordbar").forEach((n) => n.remove());
+
+  // chord tones as translucent bars at their played pitches
+  const beatsPerChord = totalBeats / melody.input.chords.length;
+  melody.input.chords.forEach((sym, i) => {
+    for (const pc of chordPitchClasses(sym)) {
+      const el = document.createElement("div");
+      el.className = "chordbar";
+      el.style.left = `${((i * beatsPerChord) / totalBeats) * 100}%`;
+      el.style.width = `calc(${(beatsPerChord / totalBeats) * 100}% - 1px)`;
+      el.style.top = `calc(${((hi - (CHORD_BASE + pc)) / lanes) * 100}% + 1px)`;
+      el.style.height = `calc(${(1 / lanes) * 100}% - 2px)`;
+      roll.insertBefore(el, playhead);
+    }
+  });
+
   noteEls = [];
   for (const n of melody.notes) {
     const el = document.createElement("div");
